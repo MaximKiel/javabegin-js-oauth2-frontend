@@ -8,7 +8,7 @@ function generateState(length) {
     var state = "";
     var alphaNumericCharacters = 'ABCDEFGHIJKLMNOPQRSTUXYZabcdefghijklmnopqrstuxyz0123456789';
     var alphaNumericCharactersLength = alphaNumericCharacters.length;
-    for (var o = 0; i < length; i++) {
+    for (var i = 0; i < length; i++) {
         state += alphaNumericCharacters.charAt(Math.floor(Math.random() * alphaNumericCharactersLength));
     }
     return state;
