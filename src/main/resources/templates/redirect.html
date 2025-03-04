@@ -15,9 +15,9 @@
     if (error) {
         window.alert("error = " + error + ", description = " + errorDescription)
     } else {
-        console.log("auth code = " + authCode);
+        window.opener.requestTokens(state, authCode);
     }
-    // window.close();
+    window.close();
 </script>
 </body>
 </html>

@@ -5,6 +5,8 @@ const CLIENT_ID = "todoapp-client";
 const SCOPE = "openid";
 const S256 = "S256";
 const AUTH_CODE_REDIRECT_URI = "https://localhost:8081/redirect";
+const GRANT_TYPE_AUTH_CODE = "authorization_code";
+const ACCESS_TOKEN_REDIRECT_URI = "https://localhost:8081/redirect";
 
 function initValues() {
     var state = generateState(30);
@@ -66,4 +68,34 @@ function requestAuthCode(state, codeChallenge) {
     authUrl += "&redirect_uri=" + AUTH_CODE_REDIRECT_URI;
 
     window.open(authUrl, 'auth window', 'width=800, height=600, left=350, top=200');
+}
+
+function requestTokens(stateFromAuthServer, authCode) {
+    var originState = document.getElementById("originState").innerHTML;
+    if (stateFromAuthServer === originState) {
+        var codeVerifier = document.getElementById("codeVerifier").innerHTML;
+        var data = {
+            "grant_type": GRANT_TYPE_AUTH_CODE,
+            "client_id": CLIENT_ID,
+            "code": authCode,
+            "code_verifier": codeVerifier,
+            "redirect_uri": ACCESS_TOKEN_REDIRECT_URI
+        };
+        $.ajax({
+            beforeSend: function (request) {
+                request.setRequestHeader("Content-type", "application/x-www-from-urlencoded; charset=UTF-8");
+            },
+            type: "POST",
+            url: KEYCLOAK_URI + "/token",
+            data: data,
+            success: accessTokenResponse,
+            dataType: "json"
+        });
+    } else {
+        alert("Error state value");
+    }
+}
+
+function accessTokenResponse(data, status, jqXHR) {
+    console.log("access_token = " + data["access_token"]);
 }
