@@ -9,6 +9,8 @@ const GRANT_TYPE_AUTH_CODE = "authorization_code";
 const ACCESS_TOKEN_REDIRECT_URI = "https://localhost:8081/redirect";
 const RESOURCE_SERVER_URI = "https://localhost:8901";
 
+var accessToken = "";
+
 function initValues() {
     var state = generateState(30);
     document.getElementById("originalState").value = state;
@@ -98,13 +100,12 @@ function requestTokens(stateFromAuthServer, authCode) {
 }
 
 function accessTokenResponse(data, status, jqXHR) {
-    var accessToken = data["access_token"];
+    accessToken =  data["access_token"];
     console.log("access_token = " + accessToken);
-
-    getDataFromResourceServer(accessToken);
+    // getDataFromResourceServer();
 }
 
-function getDataFromResourceServer(accessToken) {
+function getDataFromResourceServer() {
     $.ajax({
             beforeSend: function (request) {
                 request.setRequestHeader("Content-type", "application/x-www-form-urlencoded; charset=UTF-8");
