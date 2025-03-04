@@ -7,6 +7,7 @@ const S256 = "S256";
 const AUTH_CODE_REDIRECT_URI = "https://localhost:8081/redirect";
 const GRANT_TYPE_AUTH_CODE = "authorization_code";
 const ACCESS_TOKEN_REDIRECT_URI = "https://localhost:8081/redirect";
+const RESOURCE_SERVER_URI = "https://localhost:8901";
 
 function initValues() {
     var state = generateState(30);
@@ -99,4 +100,24 @@ function requestTokens(stateFromAuthServer, authCode) {
 function accessTokenResponse(data, status, jqXHR) {
     var accessToken = data["access_token"];
     console.log("access_token = " + accessToken);
+
+    getDataFromResourceServer(accessToken);
+}
+
+function getDataFromResourceServer(accessToken) {
+    $.ajax({
+            beforeSend: function (request) {
+                request.setRequestHeader("Content-type", "application/x-www-form-urlencoded; charset=UTF-8");
+                request.setRequestHeader("Authorization", "Bearer " + accessToken);
+            },
+        type: "GET",
+        url: RESOURCE_SERVER_URI + "/user/data",
+        success: resourceServerResponse,
+        dataType: "text"
+    });
+}
+
+function resourceServerResponse(data, status, jqXHR) {
+    document.getElementById("userdata").innerHTML = data;
+    console.log("Resource server data = " + data);
 }
