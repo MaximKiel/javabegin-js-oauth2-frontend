@@ -10,11 +10,11 @@ const ACCESS_TOKEN_REDIRECT_URI = "https://localhost:8081/redirect";
 
 function initValues() {
     var state = generateState(30);
-    document.getElementById("originalState").innerHTML = state;
+    document.getElementById("originalState").value = state;
     console.log("state = " + state);
 
     var codeVerifier = generateCodeVerifier();
-    document.getElementById("codeVerifier").innerHTML = codeVerifier;
+    document.getElementById("codeVerifier").value = codeVerifier;
     console.log("codeVerifier = " + codeVerifier);
 
     generateCodeChallenge(codeVerifier).then(codeChallenge => {
@@ -25,7 +25,7 @@ function initValues() {
 
 function generateState(length) {
     var state = "";
-    var alphaNumericCharacters = 'ABCDEFGHIJKLMNOPQRSTUXYZabcdefghijklmnopqrstuxyz0123456789';
+    var alphaNumericCharacters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     var alphaNumericCharactersLength = alphaNumericCharacters.length;
     for (var i = 0; i < length; i++) {
         state += alphaNumericCharacters.charAt(Math.floor(Math.random() * alphaNumericCharactersLength));
@@ -71,9 +71,9 @@ function requestAuthCode(state, codeChallenge) {
 }
 
 function requestTokens(stateFromAuthServer, authCode) {
-    var originState = document.getElementById("originState").innerHTML;
-    if (stateFromAuthServer === originState) {
-        var codeVerifier = document.getElementById("codeVerifier").innerHTML;
+    var originalState = document.getElementById("originalState").value;
+    if (stateFromAuthServer === originalState) {
+        var codeVerifier = document.getElementById("codeVerifier").value;
         var data = {
             "grant_type": GRANT_TYPE_AUTH_CODE,
             "client_id": CLIENT_ID,
@@ -83,7 +83,7 @@ function requestTokens(stateFromAuthServer, authCode) {
         };
         $.ajax({
             beforeSend: function (request) {
-                request.setRequestHeader("Content-type", "application/x-www-from-urlencoded; charset=UTF-8");
+                request.setRequestHeader("Content-type", "application/x-www-form-urlencoded; charset=UTF-8");
             },
             type: "POST",
             url: KEYCLOAK_URI + "/token",
@@ -97,5 +97,6 @@ function requestTokens(stateFromAuthServer, authCode) {
 }
 
 function accessTokenResponse(data, status, jqXHR) {
-    console.log("access_token = " + data["access_token"]);
+    var accessToken = data["access_token"];
+    console.log("access_token = " + accessToken);
 }
