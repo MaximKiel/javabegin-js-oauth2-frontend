@@ -1,11 +1,17 @@
+const SHA_256 = "SHA-256";
+
 function initValues() {
     var state = generateState(30);
     document.getElementById("originalState").innerHTML = state;
-    console.log("state = " + state)
+    console.log("state = " + state);
 
     var codeVerifier = generateCodeVerifier();
     document.getElementById("codeVerifier").innerHTML = codeVerifier;
-    console.log("codeVerifier = " + codeVerifier)
+    console.log("codeVerifier = " + codeVerifier);
+
+    generateCodeChallenge(codeVerifier).then(codeChallenge => {
+        console.log("codeChallenge = " + codeChallenge);
+    });
 }
 
 function generateState(length) {
@@ -32,4 +38,11 @@ function base64urlencode(sourceValue) {
         .replace(/\//g, '_')
         .replace(/=/g, '');
     return base64urlEncoded;
+}
+
+async function generateCodeChallenge(codeVerifier) {
+    var textEncoder = new TextEncoder('US-ASCII');
+    var encodedValue = textEncoder.encode(codeVerifier);
+    var digest = await window.crypto.subtle.digest(SHA_256, encodedValue);
+    return base64urlencode(Array.from(new Uint8Array(digest)));
 }
