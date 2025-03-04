@@ -114,6 +114,7 @@ function getDataFromResourceServer() {
         type: "GET",
         url: RESOURCE_SERVER_URI + "/user/data",
         success: resourceServerResponse,
+        error: resourceServerError,
         dataType: "text"
     });
 }
@@ -121,4 +122,17 @@ function getDataFromResourceServer() {
 function resourceServerResponse(data, status, jqXHR) {
     document.getElementById("userdata").innerHTML = data;
     console.log("Resource server data = " + data);
+}
+
+function resourceServerError(request, status, error) {
+    var json = JSON.parse(request.responseText);
+    var errorType = json["type"];
+
+    console.log(errorType);
+
+    if (errorType && (errorType === 'OAuth2AuthenticationException' || errorType === 'InvalidBearerTokenException')) {
+        initValues();
+    } else {
+        console.log("unknown error");
+    }
 }
