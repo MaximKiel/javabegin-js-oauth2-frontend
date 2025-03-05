@@ -8,6 +8,8 @@ const AUTH_CODE_REDIRECT_URI = "https://localhost:8081/redirect";
 const GRANT_TYPE_AUTH_CODE = "authorization_code";
 const ACCESS_TOKEN_REDIRECT_URI = "https://localhost:8081/redirect";
 const RESOURCE_SERVER_URI = "https://localhost:8901";
+const REFRESH_TOKEN_KEY = "RT";
+const GRANT_TYPE_REFRESH_TOKEN = "refresh_token";
 
 var accessToken = "";
 var refreshToken = "";
@@ -135,9 +137,32 @@ function resourceServerError(request, status, error) {
 
     console.log(errorType);
 
-    if (errorType && (errorType === 'OAuth2AuthenticationException' || errorType === 'InvalidBearerTokenException')) {
-        initValues();
+    var refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+
+    if (refreshToken) {
+        exchangeRefreshToAccessToken();
     } else {
-        console.log("unknown error");
+        initValues();
     }
+}
+
+function exchangeRefreshToAccessToken() {
+    console.log("New access token initiated");
+
+    var data = {
+        "grant_type": GRANT_TYPE_REFRESH_TOKEN,
+        "client_id": CLIENT_ID,
+        "refresh_token": refreshToken
+    };
+
+    $.ajax({
+        beforeSend: function (request) {
+            request.setRequestHeader("Content-type", "application/x-www-form-urlencoded; charset=UTF-8");
+        },
+        type: "POST",
+        url: KEYCLOAK_URI + "/token",
+        data: data,
+        success: accessTokenResponse,
+        dataType: "json"
+    });
 }
