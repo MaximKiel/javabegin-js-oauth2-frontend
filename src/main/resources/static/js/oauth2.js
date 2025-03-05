@@ -10,6 +10,7 @@ const ACCESS_TOKEN_REDIRECT_URI = "https://localhost:8081/redirect";
 const RESOURCE_SERVER_URI = "https://localhost:8901";
 
 var accessToken = "";
+var refreshToken = "";
 
 function initValues() {
     var state = generateState(30);
@@ -101,8 +102,12 @@ function requestTokens(stateFromAuthServer, authCode) {
 
 function accessTokenResponse(data, status, jqXHR) {
     accessToken =  data["access_token"];
+    refreshToken =  data["refresh_token"];
+
     console.log("access_token = " + accessToken);
-    // getDataFromResourceServer();
+    console.log("access_token = " + refreshToken);
+
+    localStorage.setItem("RT", refreshToken);
 }
 
 function getDataFromResourceServer() {
