@@ -14,7 +14,7 @@ const GRANT_TYPE_REFRESH_TOKEN = "refresh_token";
 var accessToken = "";
 var refreshToken = "";
 
-function initValues() {
+function initAccessToken() {
     var state = generateState(30);
     document.getElementById("originalState").value = state;
     console.log("state = " + state);
@@ -142,7 +142,7 @@ function resourceServerError(request, status, error) {
     if (refreshToken) {
         exchangeRefreshToAccessToken();
     } else {
-        initValues();
+        initAccessToken();
     }
 }
 
