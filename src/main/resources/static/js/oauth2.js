@@ -4,15 +4,49 @@ const RESPONSE_TYPE_CODE = "code";
 const CLIENT_ID = "todoapp-client";
 const SCOPE = "openid";
 const S256 = "S256";
-const AUTH_CODE_REDIRECT_URI = "https://localhost:8081/redirect";
+// const AUTH_CODE_REDIRECT_URI = "https://localhost:8081/redirect";
 const GRANT_TYPE_AUTH_CODE = "authorization_code";
-const ACCESS_TOKEN_REDIRECT_URI = "https://localhost:8081/redirect";
+// const ACCESS_TOKEN_REDIRECT_URI = "https://localhost:8081/redirect";
 const RESOURCE_SERVER_URI = "https://localhost:8901";
-const REFRESH_TOKEN_KEY = "RT";
 const GRANT_TYPE_REFRESH_TOKEN = "refresh_token";
+const CLIENT_ROOT_URL = "https://localhost:8081";
+
+const ID_TOKEN_KEY = "IT";
+const REFRESH_TOKEN_KEY = "RT";
+const STATE_KEY = "ST";
+const CODE_VERIFIER_KEY = "CV";
 
 var accessToken = "";
 var refreshToken = "";
+var idToken = "";
+
+function initPage() {
+    refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+
+    if (refreshToken) {
+        exchangeRefreshToAccessToken();
+    } else {
+        if (!checkAuthCode()) {
+            initAccessToken();
+        }
+    }
+}
+
+function checkAuthCode() {
+    var urlParams = new URLSearchParams(window.location.search);
+    var authCode = urlParams.get('code'),
+        state = urlParams.get('state'),
+        error = urlParams.get('error'),
+        errorDescription = urlParams.get('error_description');
+
+    if (!authCode) {
+        return false;
+    }
+
+    requestTokens(state, authCode);
+
+    return true;
+}
 
 function initAccessToken() {
     var state = generateState(30);
@@ -71,9 +105,9 @@ function requestAuthCode(state, codeChallenge) {
     authUrl += "&scope=" + SCOPE;
     authUrl += "&code_challenge=" + codeChallenge;
     authUrl += "&code_challenge_method=" + S256;
-    authUrl += "&redirect_uri=" + AUTH_CODE_REDIRECT_URI;
+    authUrl += "&redirect_uri=" + CLIENT_ROOT_URL;
 
-    window.open(authUrl, 'auth window', 'width=800, height=600, left=350, top=200');
+    window.open(authUrl, '_self');
 }
 
 function requestTokens(stateFromAuthServer, authCode) {
@@ -85,7 +119,7 @@ function requestTokens(stateFromAuthServer, authCode) {
             "client_id": CLIENT_ID,
             "code": authCode,
             "code_verifier": codeVerifier,
-            "redirect_uri": ACCESS_TOKEN_REDIRECT_URI
+            "redirect_uri": CLIENT_ROOT_URL
         };
         $.ajax({
             beforeSend: function (request) {
@@ -98,18 +132,26 @@ function requestTokens(stateFromAuthServer, authCode) {
             dataType: "json"
         });
     } else {
-        alert("Error state value");
+        initAccessToken();
     }
 }
 
 function accessTokenResponse(data, status, jqXHR) {
+    localStorage.removeItem(STATE_KEY);
+    localStorage.removeItem(CODE_VERIFIER_KEY);
+
     accessToken =  data["access_token"];
     refreshToken =  data["refresh_token"];
+    idToken =  data["id_token"];
 
     console.log("access_token = " + accessToken);
-    console.log("access_token = " + refreshToken);
+    console.log("refresh_token = " + refreshToken);
+    console.log("id_token = " + idToken);
 
-    localStorage.setItem("RT", refreshToken);
+    localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+    localStorage.setItem(ID_TOKEN_KEY, idToken);
+
+    getDataFromResourceServer();
 }
 
 function getDataFromResourceServer() {

@@ -7,15 +7,14 @@
     <script src="/js/oauth2.js"></script>
 </head>
 <body>
-<input type="hidden" readonly id="originalState"/>
-<input type="hidden" readonly id="codeVerifier"/>
-
-<button onclick="getDataFromResourceServer()">RS data</button>
 
 <div id="userdata"></div>
 
+<button onclick="logout()" id="logout">logout</button>
+
 <script>
-    initAccessToken();
+    initPage();
 </script>
+
 </body>
 </html>
